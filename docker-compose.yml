@@ -8,8 +8,6 @@ services:
     container_name: task_app_frontend
     ports:
       - "3000:3000"
-    networks:
-      - app-network
     depends_on:
       - backend
     environment:
@@ -25,13 +23,11 @@ services:
     container_name: task_app_backend
     ports:
       - "4000:4000"
-    networks:
-      - app-network
     depends_on:
       mongodb:
         condition: service_healthy
     environment:
-      - MONGODB=mongodb://root:password@127.0.0.1:27017/taskdb?authSource=admin
+      - MONGODB=mongodb://root:password@mongodb:27017/taskdb?authSource=admin
       - BACKEND_DOMAIN=localhost
       - FRONTEND_URL=http://localhost:3000
       - PORT=4000
@@ -55,10 +51,6 @@ services:
       retries: 3
       start_period: 10s
     restart: unless-stopped
-
-networks:
-  app-network:
-    driver: bridge
 
 volumes:
   mongodata:

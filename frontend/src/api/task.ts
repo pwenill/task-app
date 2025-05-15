@@ -25,7 +25,7 @@ export async function api_ManageTask(data: any) {
 
 export async function api_Tasks() {
   return fetch(getUrlApi(`/api/tasks`), {
-    method: "get",
+    method: "GET",
     headers: {
       ...getHeaders(),
     },

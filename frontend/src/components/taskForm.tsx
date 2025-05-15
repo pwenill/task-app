@@ -35,10 +35,10 @@ export function TaskForm({
   onFinish,
 }: TaskFormProps) {
   const schemaValidator = z.object({
-    title: z.string(),
-    description: z.string(),
-    status: z.string(),
-    priority: z.string(),
+    title: z.string().min(1),
+    description: z.string().min(1),
+    status: z.string().min(1),
+    priority: z.string().min(1),
   });
 
   const {
@@ -80,6 +80,7 @@ export function TaskForm({
 
   const onSubmit = (data: any) => {
     const validator = schemaValidator.safeParse(data);
+
     if (!validator.success) return;
 
     mutations.mutate({

@@ -52,57 +52,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-//#region Csrf
-
-const CSRF_COOKIE_NAME = "csrf-token";
-const CSRF_HEADER_NAME = "x-csrf-token";
-
-const generateCSRFToken = () => {
-  return crypto.randomBytes(32).toString("hex");
-};
-
-app.use((req, res, next) => {
-  if (["GET", "HEAD", "OPTIONS"].includes(req.method)) {
-    const token = req.cookies[CSRF_COOKIE_NAME] || generateCSRFToken();
-
-    if (!req.cookies[CSRF_COOKIE_NAME] && req.path === "/csrf-token") {
-      res.cookie(CSRF_COOKIE_NAME, token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 24 * 60 * 60 * 1000, // 24 heures
-      });
-    }
-    return next();
-  }
-
-  const cookieToken = req.cookies[CSRF_COOKIE_NAME];
-  const headerToken = req.headers[CSRF_HEADER_NAME];
-
-  if (!cookieToken || !headerToken || cookieToken !== headerToken) {
-    return res.status(403).json({ message: "CSRF token invalide" });
-  }
-
-  next();
-});
-
-app.get("/csrf-token", (req, res) => {
-  const token = req.cookies[CSRF_COOKIE_NAME] || generateCSRFToken();
-
-  if (!req.cookies[CSRF_COOKIE_NAME]) {
-    res.cookie(CSRF_COOKIE_NAME, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000, // 24 heures
-    });
-  }
-
-  return res.status(200).json({ csrfToken: token });
-});
-
-//#endregion
-
 // Version 1 API Routes
 app.use("/", v1Route);
 
