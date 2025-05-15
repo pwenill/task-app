@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: task_app_frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_URL_BACKEND=http://localhost:4000
+      - NEXT_PUBLIC_SITE_URL=http://localhost:3000
+      - PORT=3000
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: task_app_backend
+    ports:
+      - "4000:4000"
+    networks:
+      - app-network
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      - MONGODB=mongodb://root:password@127.0.0.1:27017/taskdb?authSource=admin
+      - BACKEND_DOMAIN=localhost
+      - FRONTEND_URL=http://localhost:3000
+      - PORT=4000
+    restart: always
+
+  mongodb:
+    image: mongo:6
+    container_name: mongodbTaskApp
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=taskdb
+    volumes:
+      - mongodata:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/taskdb --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongodata:
