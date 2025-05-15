@@ -28,7 +28,6 @@ A modern task management application built with **Next.js** (frontend), **Expres
 
 ```bash
 git clone https://github.com/pwenill/task-app
-docker-compose up --build
 ```
 
 ### 2. Start the application
